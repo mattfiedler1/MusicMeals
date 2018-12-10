@@ -1,0 +1,29 @@
+<!DOCTYPE html>
+<html>
+<head>
+	<title>MusicMeals</title>
+	<link rel="stylesheet" href="style.css">
+	<meta charset="utf-8" />
+</head>
+
+<body>
+	
+	<div id="header">
+		<h1>What are you eating?</h1>
+	</div>
+	
+	<img src="Photos/MusicMealsLogo.png" alt="MusicMeals logo" class="MusicMealsLogo">
+	
+	<select onchange="this.options[this.selectedIndex].value && (window.location = this.options[this.selectedIndex].value);">
+		<option value=" ">Select...</option>
+		<option value="player_Italian.html">Italian</option>
+		<option value="player_Chinese.html">Chinese</option>
+		<option value="player_BBQ.html">BBQ</option>
+	</select>
+	
+	<hr>
+	
+	<img src="Photos/Youtube_logo.png" alt="Developed by Youtube" class="YoutubeLogo">
+</body>
+
+</html>

@@ -1,0 +1,234 @@
+<!doctype html>
+
+<html>
+	<head>
+		<title>Italian Mealtime Radio</title>
+		<meta charset="utf-8">
+		<link href="style.css" rel="stylesheet" />
+	</head>
+
+	<body>
+        <!-- The <iframe> (and video player) will replace this <div> tag. -->
+        <div id="player"></div>
+        
+        <!-- Define Dislike Button -->
+        <div style="position: absolute; left: 30%; top: 500px;"> 
+              <img src="Photos/dislikebutton.png" onclick="call_dislike();" />
+        </div>
+
+        <!-- Define Like Button -->
+        <div style="position: absolute; right: 30%; top: 500px;"> 
+              <img src="Photos/likebutton.png"  onclick="call_like();" />
+        </div>
+
+        <!-- Define Statistics Button -->
+        <div style="position: absolute; right: 5%; top: 600px;"> 
+              <img src="Photos/stats_button.png"  onclick="call_stats();" />
+        </div>
+
+    </body>
+
+    <!-- Include JQuery -->
+    <script src="https://ajax.googleapis.com/ajax/libs/jquery/3.3.1/jquery.min.js"></script>
+	
+    <script>
+
+        /* Define the Cuisine */
+        var genre = 'Italian';
+
+        /* Create Songs Array */
+        var songs = [];
+        
+        songs = [
+            ['Shortest', 'CAT', genre, 'tPEE9ZwTmy0'],
+            ['wdawadadw', 'Fredji', genre, '8uwYo_M_I5Q'],
+            ['Happy Life', 'Fredji', genre, 'v8ID08Np-iQ'],
+            ['We Are One', 'Vexento', genre, 'Ssvu2yncgWU']
+        ];
+
+        /* Define Data Array */
+        song_data = [];
+
+        /* Get Datae from the Database */
+        $(document).ready(function(){
+            $.getJSON('https://damp-oasis-14233.herokuapp.com/song_stats.json?genre=Italian', function(data){
+                for ( i = 0 ; i < data.length; i++) {
+                    song_data[i] = [data[i]._id, String(data[i].song), String(data[i].artist), String(data[i].video_id), String(data[i].opinion)];
+                }
+
+                /* Find the Like Ratio for each song */
+                if (i = data.length){
+                    for (var i = 0; i < songs.length; i++) {
+                        var likes = 0;
+                        var total_votes = 0;
+
+                        for (var j = 0; j < song_data.length; j++) {
+                            if (songs[i][0] == song_data[j][1]) {
+                                if (song_data[j][4] == 'like'){
+                                    likes++;
+                                    total_votes++;
+                                } else {
+                                    total_votes++;
+                                }
+                            }
+                        }
+
+                        var like_ratio = likes / total_votes;
+
+                        /* If no like ratio exists, then set to zero */
+                        if (total_votes == 0) {
+                            like_ratio = 0;
+                        }
+                        songs[i][4] = like_ratio;
+                    }
+                    /* Because the first video will always play at the very 
+                    beginning set its like ratio to something impossibly 
+                    negative so that it will not play again */
+                    songs[0][4] = -1;
+
+                    /* Sort the songs array based on like ratio */
+                    songs.sort(function(a,b) {
+                        return b[4] - a[4];
+                    });
+                }
+            });
+        });
+
+        var index = 0;
+
+        /* This code loads the IFrame Player API code asynchronously. */ 
+        var tag = document.createElement('script');
+
+        tag.src = "https://www.youtube.com/iframe_api";
+        var firstScriptTag = document.getElementsByTagName('script')[0];
+        firstScriptTag.parentNode.insertBefore(tag, firstScriptTag);
+
+        /* This function creates an <iframe> (and YouTube player) after the 
+        API code downloads. */ 
+        /* It loads songs by video_id which changes as a new song is to be 
+        played */
+        var player;
+        var video_id = songs[index][3];
+        function onYouTubeIframeAPIReady() {
+            player = new YT.Player('player', {
+                height: '390',
+                width: '640',
+                videoId: video_id,
+                events: {
+                    'onReady': onPlayerReady,
+                    'onStateChange': onPlayerStateChange
+                }
+            });
+        }
+
+        /* Helper function so that we can call the like function with the
+        appropriate information */
+        function call_like() {
+            /* Conditional to make sure you can only like a song once */
+            if (!songs[index][5]){
+                like(index);
+            } else {
+                console.log(songs[index][5]);
+            }
+        }
+
+        /* Helper function so that we can call the dislike function with the 
+        appropriate information */
+        function call_dislike() {
+            dislike(index);
+        }
+            
+        function call_stats() {
+            window.location.href = "https://damp-oasis-14233.herokuapp.com/?genre=Italian";
+        }
+
+        /* The API will call this function when the video player is ready. */
+        function onPlayerReady(event) {
+            event.target.playVideo();
+        }
+
+        /* The API calls this function when the player's state changes. The 
+        function indicates that when playing a video (state=1), the player 
+        should play for six seconds and then stop. */
+        var done = false;
+        function onPlayerStateChange(event) {
+            if (event.data == YT.PlayerState.PLAYING && !done) {
+                done = true;
+            }
+            /* Play the next song in the array */
+            else if (event.data === 0){
+                video_id = songs[index][3];
+                index = index + 1;
+                if (index == songs.length) {
+                    window.location.href = "index.html";
+                }
+                player.loadVideoById(video_id); 
+            }
+
+        }
+
+        /* Helper function to stop the video  */
+        function stopVideo() {
+          player.stopVideo();
+        }
+
+        /* If liked, the song data and opinion are recorded to the database */
+        function like(i) {
+            var song = songs[i][0];
+            var artist = songs[i][1];
+            var genre = songs[i][2];
+            var video_id = songs[i][3];
+            var opinion = 'like';
+
+            var toInsert = {
+                "song": song, 
+                "artist": artist,
+                "genre": genre,
+                "video_id": video_id,
+                "opinion": opinion
+            }
+
+            $(document).ready(function () {
+                var url = "https://damp-oasis-14233.herokuapp.com/submit";
+                $.post(url, toInsert)
+            })
+
+            /* Append a notification to the end of the sond data so we can 
+            tell if the user already liked a song and if they did, they are 
+            not able to like it again */
+            songs[i][5] = "You already liked this."
+        }
+
+        /* If disliked, the song data and opinion are recorded to the database 
+        and the next song is played */
+        function dislike(i) {
+            var song = songs[i][0];
+            var artist = songs[i][1];
+            var genre = songs[i][2];
+            var video_id = songs[i][3];
+            var opinion = 'dislike';
+           
+            var toInsert = {
+                "song": song, 
+                "artist": artist,
+                "genre": genre,
+                "video_id": video_id,
+                "opinion": opinion
+            }
+
+            $(document).ready(function () {
+                var url = "https://damp-oasis-14233.herokuapp.com/submit";
+                $.post(url, toInsert)
+            })
+
+            /* Play the next song */ 
+            video_id = songs[index][3];
+            index = index + 1;
+            if (index == songs.length) {
+                window.location.href = "index.html";
+            }
+            player.loadVideoById(video_id); 
+        }
+
+    </script>
+</html>

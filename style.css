@@ -1,0 +1,64 @@
+
+body {
+	background-color: #BABABA; 
+	text-align: center;
+}
+
+#header {
+	text-align: center;
+	font-family: "Trebuchet MS";
+	letter-spacing: 3px;
+	color: #fffaa8;
+	background-color: black;
+}
+
+
+select{
+	display: block;
+	margin: 0 auto;
+	font-family: "Trebuchet MS", monospace;
+	font-size: 13px;
+	background-color: black;
+	color: #fffaa8;
+	border-radius: 4px;
+	width: 200px;
+	height: 40px;
+}
+
+a { 
+	text-decoration: none;
+	color: #fffaa8 
+} 
+
+a:visited {
+	text-decoration: none;
+	color: #fffaa8 
+}
+
+.MusicMealsLogo {
+	margin: 0; 
+	width: 533px;
+	height: 400px;
+}
+
+.YoutubeLogo {
+	margin: 0; 
+	width: 210px;
+	height: 70px;
+}
+
+button{
+	font-family: "Trebuchet MS", monospace;
+	background-color: black;
+	color: #fffaa8;
+	display: block;
+	margin: 0 auto;
+	border-radius: 4px;
+	font-size: 15px;
+	width: 200px;
+	height: 40px;
+}
+
+button:hover {
+    box-shadow: 0 12px 16px 0 rgba(0,0,0,0.24), 0 17px 50px 0 rgba(0,0,0,0.19);
+}
